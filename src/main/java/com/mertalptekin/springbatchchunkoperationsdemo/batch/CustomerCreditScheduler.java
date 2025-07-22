@@ -10,7 +10,7 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
 @Component
-//@EnableScheduling
+@EnableScheduling
 public class CustomerCreditScheduler {
 
     @Autowired
@@ -19,10 +19,14 @@ public class CustomerCreditScheduler {
     @Autowired
     private Job job;
 
+    // Scheduled işlemlerde Batch Transaction ile AppTransaction ayrılmadığında bu tarz sorunlar ile karşılabiliriz.
+
     @Scheduled(cron = "0 */1 * * * *")
     public  void run() throws Exception{
 
-        JobParameters jobParameters = new JobParametersBuilder().toJobParameters();
+        System.out.println("Running Customer Credit Scheduler");
+        // Sürekli her bir date paramteresi için kayıt atıyor.
+        JobParameters jobParameters = new JobParametersBuilder().addLong("date",System.currentTimeMillis()).toJobParameters();
 
         jobLauncher.run(job,jobParameters);
     }
