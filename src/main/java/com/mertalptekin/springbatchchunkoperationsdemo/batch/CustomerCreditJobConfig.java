@@ -7,6 +7,7 @@ import com.mertalptekin.springbatchchunkoperationsdemo.listener.CustomSkipListen
 import com.mertalptekin.springbatchchunkoperationsdemo.listener.CustomStepExecutionListener;
 import com.mertalptekin.springbatchchunkoperationsdemo.model.CustomerCredit;
 import com.mertalptekin.springbatchchunkoperationsdemo.policy.CustomSkipPolicy;
+import com.mertalptekin.springbatchchunkoperationsdemo.repository.CustomerCreditRepository;
 import org.springframework.batch.core.Job;
 import org.springframework.batch.core.Step;
 import org.springframework.batch.core.configuration.annotation.EnableBatchProcessing;
@@ -50,6 +51,9 @@ public class CustomerCreditJobConfig {
 
     @Autowired
     private CustomChunkListener customChunkListener;
+
+    @Autowired
+    private CustomerCreditRepository customerCreditRepository;
 
     // Senaryo -> Kredi Notu 600 üstü olan CustomerCredit bilgilerini alıp, Hatalı kayıtları atlatıp, Hatalı olmayan kayıtları okuyup, Bunları dbdeki customers table set edelim. CustomerRepository üzerinden save edelim
     // Writer-> JPAItemWriter
@@ -95,6 +99,12 @@ public class CustomerCreditJobConfig {
     public ItemWriter<CustomerCredit> customerWriter() {
 
         return items -> {
+
+            // write işleminde itemları olduğu gibi chunk bazlı kaydettik.
+            // chunk sayısı kadar transaction içinde bulk save edicez.
+            // herhangi bir execption durumunda skipLimit değeri geçilirse Job Failed olur.
+            customerCreditRepository.saveAll(items);
+
             // Repository ile Save CustomerCredit Entity
             System.out.println("Item Writer Size" + items.size());
         };
