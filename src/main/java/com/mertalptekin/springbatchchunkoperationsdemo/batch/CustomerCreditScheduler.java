@@ -10,7 +10,7 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
 @Component
-@EnableScheduling
+//@EnableScheduling
 public class CustomerCreditScheduler {
 
     @Autowired
@@ -19,7 +19,7 @@ public class CustomerCreditScheduler {
     @Autowired
     private Job job;
 
-    @Scheduled(cron = "0 */3 * * * *")
+    @Scheduled(cron = "0 */1 * * * *")
     public  void run() throws Exception{
 
         JobParameters jobParameters = new JobParametersBuilder().toJobParameters();

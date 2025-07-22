@@ -1,8 +1,15 @@
 package com.mertalptekin.springbatchchunkoperationsdemo.batch;
 
 
+import com.mertalptekin.springbatchchunkoperationsdemo.listener.CustomChunkListener;
+import com.mertalptekin.springbatchchunkoperationsdemo.listener.CustomJobExecutionListener;
+import com.mertalptekin.springbatchchunkoperationsdemo.listener.CustomSkipListener;
+import com.mertalptekin.springbatchchunkoperationsdemo.listener.CustomStepExecutionListener;
 import com.mertalptekin.springbatchchunkoperationsdemo.model.CustomerCredit;
+import com.mertalptekin.springbatchchunkoperationsdemo.policy.CustomSkipPolicy;
 import org.springframework.batch.core.Job;
+import org.springframework.batch.core.JobExecutionListener;
+import org.springframework.batch.core.SkipListener;
 import org.springframework.batch.core.Step;
 import org.springframework.batch.core.configuration.annotation.EnableBatchProcessing;
 import org.springframework.batch.core.job.builder.JobBuilder;
@@ -30,6 +37,21 @@ public class CustomerCreditJobConfig {
 
     @Autowired
     private PlatformTransactionManager transactionManager;
+
+    @Autowired
+    private CustomSkipListener customSkipListener;
+
+    @Autowired
+    private CustomSkipPolicy customSkipPolicy;
+
+    @Autowired
+    private CustomJobExecutionListener jobExecutionListener;
+
+    @Autowired
+    private CustomStepExecutionListener stepExecutionListener;
+
+    @Autowired
+    private CustomChunkListener customChunkListener;
 
     // Senaryo -> Kredi Notu 600 üstü olan CustomerCredit bilgilerini alıp, Hatalı kayıtları atlatıp, Hatalı olmayan kayıtları okuyup, Bunları dbdeki customers table set edelim. CustomerRepository üzerinden save edelim
     // Writer-> JPAItemWriter
@@ -61,9 +83,12 @@ public class CustomerCreditJobConfig {
     @Bean
     public ItemProcessor<CustomerCredit,CustomerCredit> customerProcessor() {
         return  customerCredit ->  {
-            if(customerCredit.getCreditScore() > 600)
-                return  customerCredit;
-
+            if(customerCredit.getCreditScore() > 600) {
+                return customerCredit;
+            }
+//             else {
+//                 throw new RuntimeException("item process error");
+//            }
             return  null;
         };
     }
@@ -77,23 +102,36 @@ public class CustomerCreditJobConfig {
         };
     }
 
+    // Not: faultTolerant tanımlanmadığı için bütün süreç sıfırdan başladı.
+    // Not: faultTolerant değeri açık ise daha önceden Job Failed olduğu durumda, yeniden Job gönderildiğinde daha önceki hatalar telafi edildiyse daha önce yazılan chunk değerleri atlanarak işlem kaldığı process ten devam eder.
+
     @Bean
     public Step customerCreditStep(){
-        return  new StepBuilder("customerCreditStep",jobRepository).<CustomerCredit,CustomerCredit>chunk(10,transactionManager)
+        return  new StepBuilder("customerCreditStep",jobRepository).<CustomerCredit,CustomerCredit>chunk(2,transactionManager)
                 .reader(customerCsvReader())
                 .processor(customerProcessor())
                 .writer(customerWriter())
                 .faultTolerant()
                 .skip(RuntimeException.class)
                 .skipLimit(10) // 5 hata atlamanın fazlasına geçilirse o zaman Step Failed olsun.Job Failed Olsun
+                .skipPolicy(customSkipPolicy)
                 .retry(RuntimeException.class)
                 .retryLimit(3) // Bağlantı kopması vs gibi hata durumlarında job çalıştırmasını 3 kere restart et
+                .listener(stepExecutionListener)
+                .listener(customChunkListener)
+                .listener(customSkipListener)
+
+                // Kayıt Atlatma Poliçesi -> Var olan Spring Batch Policy yerine burada custom policy kullan. Defaultda bu policeler
                 .build();
+
+        // ItemReaderListner,ItemWriterListener,ItemProcessorListner step bazlı çalışırız. Step Listenerların bir çok adımı Chunk Oriented Stepe özgüdür.
+
+        // Not yukarıdaki tüm listenerlar Setp bazlı çalışan listener örneğidir.
     }
 
     @Bean
     public Job customerCreditJob(){
-        return  new JobBuilder("customerCreditJob",jobRepository).start(customerCreditStep()).build();
+        return  new JobBuilder("customerCreditJob",jobRepository).start(customerCreditStep()).listener(jobExecutionListener).build(); // Job Bazlı listener örneği
     }
 
 

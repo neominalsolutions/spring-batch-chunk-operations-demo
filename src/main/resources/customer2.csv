@@ -8,20 +8,14 @@ Jack,29,710
 Mason,30,670
 Nina,24,630
 Oliver,38,720
-Liam,41,9999999999  # Aşırı büyük kredi puanı
-,,  # Boş satır
-Liam,41,"four hundred"  # Geçersiz kredi puanı
-Eve,28,threehundred  # Yanlış kredi puanı formatı
 Sam,27,600
 Tina,32,560
 Uma,22,490
-Harry,30,,    # Eksik kredi puanı
 Grace,22,620
 Liam,41,540
 Penny,35,650
 Quinn,28,640
 Rachel,33,750
-Quinn,,640     # Eksik yaş verisi
 Yara,34,495
 Zane,30,710
 Ursula,38,650
