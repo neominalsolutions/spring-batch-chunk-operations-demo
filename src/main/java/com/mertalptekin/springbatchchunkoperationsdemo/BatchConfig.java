@@ -1,6 +1,5 @@
-package com.mertalptekin.springbatchchunkoperationsdemo.batch;
+package com.mertalptekin.springbatchchunkoperationsdemo;
 
-import org.hibernate.annotations.ConcreteProxy;
 import org.springframework.batch.core.configuration.annotation.EnableBatchProcessing;
 import org.springframework.batch.core.repository.JobRepository;
 import org.springframework.batch.core.repository.support.JobRepositoryFactoryBean;
