@@ -8,8 +8,6 @@ import com.mertalptekin.springbatchchunkoperationsdemo.listener.CustomStepExecut
 import com.mertalptekin.springbatchchunkoperationsdemo.model.CustomerCredit;
 import com.mertalptekin.springbatchchunkoperationsdemo.policy.CustomSkipPolicy;
 import org.springframework.batch.core.Job;
-import org.springframework.batch.core.JobExecutionListener;
-import org.springframework.batch.core.SkipListener;
 import org.springframework.batch.core.Step;
 import org.springframework.batch.core.configuration.annotation.EnableBatchProcessing;
 import org.springframework.batch.core.job.builder.JobBuilder;
