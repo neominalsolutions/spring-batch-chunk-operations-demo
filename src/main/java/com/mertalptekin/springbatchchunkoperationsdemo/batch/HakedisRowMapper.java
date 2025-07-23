@@ -2,11 +2,13 @@ package com.mertalptekin.springbatchchunkoperationsdemo.batch;
 
 import com.mertalptekin.springbatchchunkoperationsdemo.model.Hakedis;
 import org.springframework.jdbc.core.RowMapper;
+import org.springframework.stereotype.Component;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
 
+@Component
 public class HakedisRowMapper  implements RowMapper<Hakedis> {
 
     @Override

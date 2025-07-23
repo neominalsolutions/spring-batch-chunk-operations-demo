@@ -23,7 +23,8 @@ public class CustomerCreditScheduler {
 
     // Scheduled işlemlerde Batch Transaction ile AppTransaction ayrılmadığında bu tarz sorunlar ile karşılabiliriz.
 
-    //@Scheduled(cron = "0 */1 * * * *")
+    // her ayın ilk günü
+    @Scheduled(cron = "0 0 0 1 * ?")
     public  void run() throws Exception{
 
         System.out.println("Running Customer Credit Scheduler");
