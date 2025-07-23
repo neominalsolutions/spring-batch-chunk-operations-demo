@@ -29,7 +29,7 @@ import org.springframework.core.io.ClassPathResource;
 import org.springframework.transaction.PlatformTransactionManager;
 
 @Configuration
-@EnableBatchProcessing
+//@EnableBatchProcessing
 public class CustomerCreditJobConfig {
 
     @Autowired

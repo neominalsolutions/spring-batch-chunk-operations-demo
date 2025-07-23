@@ -23,11 +23,13 @@ public class BatchController {
     private JobLauncher jobLauncher;
 
     @Autowired
-    @Qualifier("customerCreditJob")
+    @Qualifier("partitionerJob")
     private Job job;
 
     @PostMapping("startJob")
     public ResponseEntity<String> run() throws JobInstanceAlreadyCompleteException, JobExecutionAlreadyRunningException, JobParametersInvalidException, JobRestartException {
+
+        System.out.println("Starting Job");
 
         var parameters = new JobParametersBuilder().addLong("date",System.currentTimeMillis()).toJobParameters();
         jobLauncher.run(job,parameters);

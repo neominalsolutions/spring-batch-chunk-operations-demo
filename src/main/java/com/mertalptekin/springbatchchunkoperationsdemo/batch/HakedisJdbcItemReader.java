@@ -39,7 +39,7 @@ public class HakedisJdbcItemReader implements ItemReader<Hakedis> {
     }
 
     private void loadData() {
-        String sql = "select * from hakedis";
+        String sql = "select * from test_vm";
         results = jdbcTemplate.query(sql, rowMapper);
         iterator = results.iterator();
     }

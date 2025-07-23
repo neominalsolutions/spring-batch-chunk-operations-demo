@@ -18,12 +18,15 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.jdbc.core.PreparedStatementSetter;
 import org.springframework.transaction.PlatformTransactionManager;
 
 import javax.sql.DataSource;
+import java.sql.PreparedStatement;
+import java.sql.SQLException;
 
 @Configuration
-@EnableBatchProcessing
+//@EnableBatchProcessing
 public class HakedisJobConfig {
 
     @Autowired
@@ -81,7 +84,7 @@ public class HakedisJobConfig {
     }
 
     @Bean
-    public JdbcPagingItemReader<Hakedis> hakedisReader() throws Exception {
+    public JdbcPagingItemReader<Hakedis> jdbcPagingItemReader() throws Exception {
         JdbcPagingItemReader<Hakedis> reader = new JdbcPagingItemReader<>();
 
         PagingQueryProvider pagingQueryProvider = pagingQueryProvider();
@@ -95,13 +98,34 @@ public class HakedisJobConfig {
     }
 
     @Bean
-    public JdbcCursorItemReader<Hakedis> hakedisItemReader2() throws Exception {
+    public JdbcCursorItemReader<Hakedis> jdbcCursorItemReaderView() throws Exception {
 
         // JdbcPaginItemReaderdan tek farklı daha küçük veri kümeleri için tercih edilmesi sayfalama yapısına sahip olmaması
 
         JdbcCursorItemReader<Hakedis> reader = new JdbcCursorItemReader<>();
         reader.setDataSource(dataSource);
         reader.setSql("select * from hakedis_vm");
+        reader.setRowMapper(new HakedisRowMapper());
+
+        return  reader;
+    }
+
+
+    @Bean
+    public JdbcCursorItemReader<Hakedis> jdbcCursorItemWithParamsReader() throws Exception {
+
+        // JdbcPaginItemReaderdan tek farklı daha küçük veri kümeleri için tercih edilmesi sayfalama yapısına sahip olmaması
+
+        JdbcCursorItemReader<Hakedis> reader = new JdbcCursorItemReader<>();
+        reader.setDataSource(dataSource);
+        reader.setSql("select * from get_monthly_employee_summary(?,?)");
+        reader.setPreparedStatementSetter(new PreparedStatementSetter() {
+            @Override
+            public void setValues(PreparedStatement ps) throws SQLException {
+                ps.setInt(1, 6);
+                ps.setInt(2, 2025);
+            }
+        });
         reader.setRowMapper(new HakedisRowMapper());
 
         return  reader;
@@ -132,13 +156,13 @@ public class HakedisJobConfig {
     }
 
     @Bean
-    public HakedisJdbcItemReader hkCustomReader() {
+    public HakedisJdbcItemReader customReader() {
         return new HakedisJdbcItemReader();
     }
 
 
     @Bean
-    public JpaItemWriter<CustomerCredit> customerCreditItemWriter2() throws Exception {
+    public JpaItemWriter<CustomerCredit> jpaItemWriter() throws Exception {
 
             // merge veya persist olarak item otomatik kayıt eder.
             // transactional yapıdadır.
@@ -178,7 +202,7 @@ public class HakedisJobConfig {
     @Bean
     public Step hakedisStep(){
         try {
-            return  new StepBuilder("hakedisStep",jobRepository).<Hakedis,Hakedis>chunk(10,transactionManager).reader(hkCustomReader()).processor(hakedisProcessor()).writer(hakedisWriter()).faultTolerant().build();
+            return  new StepBuilder("hakedisStep",jobRepository).<Hakedis,Hakedis>chunk(10,transactionManager).reader(jdbcCursorItemWithParamsReader()).processor(hakedisProcessor()).writer(hakedisWriter()).faultTolerant().build();
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
