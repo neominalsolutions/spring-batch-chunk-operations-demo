@@ -15,11 +15,11 @@ public class HakedisRowMapper  implements RowMapper<Hakedis> {
         Hakedis hakedis = new Hakedis();
         hakedis.setCalisan_id(rs.getInt("calisan_id"));
         hakedis.setAy(rs.getInt("ay"));
-        hakedis.setYil(rs.getInt("year"));
-        hakedis.setToplam_prim(rs.getBigDecimal("toplam_prim"));
-        hakedis.setToplam_avans(rs.getBigDecimal("toplam_avans"));
+        hakedis.setYil(rs.getInt("yil"));
         hakedis.setToplam_prim(rs.getBigDecimal("toplam_prim"));
         hakedis.setToplam_kesinti(rs.getBigDecimal("toplam_kesinti"));
+        hakedis.setToplam_avans(rs.getBigDecimal("toplam_avans"));
+        hakedis.setToplam_kazanc(rs.getBigDecimal("toplam_kazanc"));
         hakedis.setHesaplama_tarihi(rs.getDate("hesaplama_tarihi"));
 
         return hakedis;

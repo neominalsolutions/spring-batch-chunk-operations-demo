@@ -139,7 +139,7 @@ public class CustomerCreditJobConfig {
         // Not yukarıdaki tüm listenerlar Setp bazlı çalışan listener örneğidir.
     }
 
-    @Bean
+    @Bean(name = "customerCreditJob")
     public Job customerCreditJob(){
         return  new JobBuilder("customerCreditJob",jobRepository).start(customerCreditStep()).listener(jobExecutionListener).build(); // Job Bazlı listener örneği
     }
