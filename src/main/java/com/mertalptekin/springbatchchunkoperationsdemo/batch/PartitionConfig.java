@@ -34,7 +34,7 @@ public class PartitionConfig {
 
 
     @Autowired
-    private LogginTask logginTask;
+    private LogginTaskExecutor LogginTaskExecutor;
 
     @Bean
     public HakedisJdbcItemReader jdbcItemReader() {
@@ -65,8 +65,7 @@ public class PartitionConfig {
     // Partioner Step için gerekli bir adım asenkron split bu sayede oluyor
     @Bean
     public TaskExecutor taskExecutor() {
-//        SimpleAsyncTaskExecutor taskExecutor = new SimpleAsyncTaskExecutor();
-//        taskExecutor.setThreadNamePrefix("taskExecutor-");
+
 
         ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
         executor.setCorePoolSize(5);
@@ -82,8 +81,9 @@ public class PartitionConfig {
     public PartitionHandler partitionHandler() {
 
         TaskExecutorPartitionHandler ts = new TaskExecutorPartitionHandler();
-        ts.setGridSize(2); // 10 farklı thread üzerinde işlem yap
-        ts.setTaskExecutor(taskExecutor());
+
+        ts.setGridSize(10); // 10 farklı thread üzerinde işlem yap
+        ts.setTaskExecutor(LogginTaskExecutor);
         ts.setStep(customStep());
 
         return  ts;
@@ -95,7 +95,7 @@ public class PartitionConfig {
         SimplePartitioner partitioner = new SimplePartitioner();
         return new StepBuilder("partionerStep",jobRepository)
                 .partitioner("customStep",partitioner)
-                .step(customStep())
+                .partitionHandler(partitionHandler())
                 .build();
     }
 
